@@ -1,9 +1,26 @@
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
+let assets = {};
+assets["opossum"] = new Image(); assets["opossum"].src = 'assets/opossum.webp';
 
-let screen = {res:10, width:0,height:0};
+
 let frameCount = 0;
 function doFrame(){
+
+    updateRes();
+    clearScreen();
+    ctx.drawImage(assets["opossum"],screen.width/2-40,screen.height/2-22,80,44);
+
+    frameCount++;
+
+
+    requestAnimationFrame(doFrame);
+}
+requestAnimationFrame(doFrame);
+
+
+let screen = {res:320, width:0,height:0};
+function updateRes(){
     let ratio = window.innerWidth/window.innerHeight;
     screen.width = screen.res*ratio;
     screen.height = screen.res;
@@ -11,30 +28,13 @@ function doFrame(){
     ctx.canvas.width = screen.width;
     ctx.canvas.height = screen.height;
 
-
     canvas.style.width = window.innerWidth+"px";
     canvas.style.height = window.innerHeight+"px";
+}
 
-
-    ctx.fillStyle = "#6a5f5f";
+function clearScreen(){
+    ctx.fillStyle = "#ffffff";
     ctx.beginPath();
     ctx.fillRect(0,0,10000,10000);
     ctx.closePath();
-
-    frameCount++;
-
-        for(let i = 0; i<screen.width; i++)
-            for(let j = 0; j<screen.width; j++)
-            {
-                ctx.fillStyle = "#6a5f5f";
-                if((i+j)%2==0)
-                    ctx.fillStyle = "#c5a3a3";
-                ctx.beginPath();
-                ctx.fillRect(i,j,1,1);
-                ctx.closePath();
-            }
-
-    requestAnimationFrame(doFrame);
 }
-
-requestAnimationFrame(doFrame);
