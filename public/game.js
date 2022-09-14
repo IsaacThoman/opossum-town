@@ -2,17 +2,28 @@ const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 let assets = {};
 let keys = {};
-let player = {x:0, y:0, baseSpeed:2 ,speed:0, speedDampened:0};
-let lastServerMessage = '';
+let player = {x:0, y:0, baseSpeed:2 ,speed:0, speedDampened:0, id:Math.random(), flip:1, flipDampened:1};
 
-assets["opossum"] = new Asset('assets/opossum.webp', 80,44);
-assets["bg"] = new Asset('assets/roadtest2.png', 1024,1024);
+let onlinePlayerData = [];
+
+let playerTextures = [new Image(), new Image()];
+playerTextures[0].src = 'assets/opossum.webp';playerTextures[1].src = 'assets/opossum_flipped.webp';
+let playerAsset = new Asset(playerTextures[0],80,44);
+
+let onlinePlayerAsset = new Asset(playerTextures[0],80,44);
+let onlinePlayerWorldObject = new WorldObject(onlinePlayerAsset,0,0,1);
 
 for(let i = 1; i<=6; i++)
     assets["road"+i] = new Asset('assets/roads/road'+i+'.png',42,42);
 
 function Asset(texture, w, h){
-    this.texture = new Image(); this.texture.src = texture;
+    if(typeof texture == 'string'){
+        this.texture = new Image(); this.texture.src = texture;
+    }else {
+        this.texture = texture;
+    }
+
+
     this.w = w;
     this.h = h;
     this.draw = function(ctx2, x, y, s){
@@ -25,13 +36,13 @@ function WorldObject(asset, x, y, s){
     this.y = y;
     this.s = s;
     this.draw = function(ctx2){
-       asset.draw(ctx2,x+screen.x +screen.w/2,y+screen.y +screen.h/2,s);
+        asset.draw(ctx2,this.x-screen.x +screen.w/2,-this.y+screen.y +screen.h/2,s);
     };
 }
 
 let frameOn=0;
 let xVals = [];
-let bg = new WorldObject(assets["bg"],0,0,1);
+let bg = new WorldObject(new Asset('assets/roadtest2.png', 1024,1024),0,0,1);
 let worldObjects = [];
 for(let i = -3; i<3; i++) {
     worldObjects.push(new WorldObject(assets["road2"],-42*3,i*42,1))
@@ -55,17 +66,36 @@ function doFrame(){
     for(let i = 0; i<worldObjects.length; i++)
         worldObjects[i].draw(ctx);
 
-    assets["opossum"].draw(ctx, screen.w/2, screen.h/2+(player.speedDampened*3/player.baseSpeed*Math.sin(frameOn/3)),1);
-    player.speedDampened = player.speedDampened + (player.speed-player.speedDampened)*0.2;
+    if(player.flipDampened>0) {playerAsset.w=80*player.flipDampened; playerAsset.texture = playerTextures[0];}
+    else {playerAsset.w=80*Math.abs(player.flipDampened); playerAsset.texture = playerTextures[1];}
+ //   playerAsset.h = 44+(player.speedDampened*0.5*Math.sin(frameOn/3))
+
+    playerAsset.draw(ctx, screen.w/2, screen.h/2+(player.speedDampened*3/player.baseSpeed*Math.sin(frameOn/3)),1);
+
+    for(let i = 0; i<onlinePlayerData.length; i++){
+        onlinePlayerWorldObject.x = onlinePlayerData[i].x;
+        onlinePlayerWorldObject.y = onlinePlayerData[i].y;
+        if(onlinePlayerData[i].flip>0)
+            onlinePlayerAsset.texture = playerTextures[0];
+        else
+            onlinePlayerAsset.texture = playerTextures[1];
+
+        onlinePlayerWorldObject.draw(ctx);
+    }
 
     addDebug('x: '+Math.floor(player.x) +' y: '+Math.floor(player.y));
-    addDebug(lastServerMessage);
+
+    if(utcTime()-lastServerMessageTime>5) addDebug('not connected.');
+
+    let addS = ''; if(onlinePlayerData.length>0) addS = 's';
+    addDebug(onlinePlayerData.length +1+ ' player'+addS+' online');
 
 //xVals[frameOn] = player.x;
 //console.log(xVals[frameOn]-xVals[frameOn-15])
 
     processInputs();
     showDebugText();
+    uploadPlayerData();
 
     frameOn++;
     if(player.x>512)player.x=512; if(player.x<-512) player.x=-512;
@@ -120,16 +150,19 @@ function processInputs(){
     player.speed = 0;
     if(keyDown('w')) yC+=1;
     if(keyDown('s')) yC-=1;
-    if(keyDown('a')) xC+=1;
-    if(keyDown('d')) xC-=1;
+    if(keyDown('a')){ xC-=1; player.flip = -1;}
+    if(keyDown('d')) {xC+=1; player.flip = 1;}
     let angle = Math.atan2(yC,xC);
     if(keysDown(['w','a','s','d'])){ player.speed = player.baseSpeed; lastAngle = angle};
 
+    player.x += player.speedDampened*Math.cos(lastAngle);
+    player.y += player.speedDampened*Math.sin(lastAngle);
 
+    if(player.speedDampened<0.001) player.speedDampened = 0;
 
+    player.speedDampened = player.speedDampened + (player.speed-player.speedDampened)*0.2;
+    player.flipDampened = player.flipDampened + (player.flip-player.flipDampened)*0.7;
 
-        player.x += player.speedDampened*Math.cos(lastAngle);
-        player.y += player.speedDampened*Math.sin(lastAngle);
 
 }
 var debugText = '';
