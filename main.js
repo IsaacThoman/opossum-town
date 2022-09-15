@@ -56,5 +56,4 @@ function cleanPlayerData(){
             newPlayerData.push(playerData[i]);
     }
     playerData = newPlayerData;
-    console.log('player count:'+playerData.length);
 }

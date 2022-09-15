@@ -73,8 +73,10 @@ function doFrame(){
     playerAsset.draw(ctx, screen.w/2, screen.h/2+(player.speedDampened*3/player.baseSpeed*Math.sin(frameOn/3)),1);
 
     for(let i = 0; i<onlinePlayerData.length; i++){
+        let bouncyYOffset = onlinePlayerData[i].speed*2/onlinePlayerData[i].baseSpeed*Math.sin(frameOn/3);
+
         onlinePlayerWorldObject.x = onlinePlayerData[i].x;
-        onlinePlayerWorldObject.y = onlinePlayerData[i].y;
+        onlinePlayerWorldObject.y = onlinePlayerData[i].y + bouncyYOffset;
         if(onlinePlayerData[i].flip>0)
             onlinePlayerAsset.texture = playerTextures[0];
         else
