@@ -51,10 +51,10 @@ for(let i = -3; i<3; i++) {
     worldObjects.push(new WorldObject(assets["road1"],42*i-42*6,-42*4,1))
 
 }
-worldObjects.push(new WorldObject(assets['road6'],-42*3,42*3,1))
-worldObjects.push(new WorldObject(assets['road3'],-42*3,-42*4,1))
-worldObjects.push(new WorldObject(assets['road4'],-42*10,42*3,1))
-worldObjects.push(new WorldObject(assets['road5'],-42*10,-42*4,1))
+worldObjects.push(new WorldObject(assets['road3'],-42*3,42*3,1))
+worldObjects.push(new WorldObject(assets['road6'],-42*3,-42*4,1))
+worldObjects.push(new WorldObject(assets['road5'],-42*10,42*3,1))
+worldObjects.push(new WorldObject(assets['road4'],-42*10,-42*4,1))
 
 function doFrame(){
     clearDebug();
