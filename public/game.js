@@ -150,12 +150,13 @@ function processInputs(){
     let xC = 0;
     let yC = 0;
     player.speed = 0;
-    if(keyDown('w')) yC+=1;
-    if(keyDown('s')) yC-=1;
-    if(keyDown('a')){ xC-=1; player.flip = -1;}
-    if(keyDown('d')) {xC+=1; player.flip = 1;}
+    if(keysDown(['w','W','ArrowUp'])) yC+=1;
+    if(keysDown(['s','S','ArrowDown'])) yC-=1;
+    if(keysDown(['a','A','ArrowLeft'])){ xC-=1; player.flip = -1;}
+    if(keysDown(['d','D','ArrowRight'])) {xC+=1; player.flip = 1;}
     let angle = Math.atan2(yC,xC);
-    if(keysDown(['w','a','s','d'])){ player.speed = player.baseSpeed; lastAngle = angle};
+    if(keysDown(['w','a','s','d','W','S','A','D','ArrowUp','ArrowDown','ArrowLeft','ArrowRight']))
+        { player.speed = player.baseSpeed; lastAngle = angle};
 
     player.x += player.speedDampened*Math.cos(lastAngle);
     player.y += player.speedDampened*Math.sin(lastAngle);
